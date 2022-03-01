@@ -38,7 +38,7 @@ activateAccountEmail = (email, id, token) => {
       to: email,
       subject: "Account activation",
       // html: `<p>Please click on the following link, or paste it into your browser to complete the account activation process:<br><br><a href="http://localhost:3000/account-verification-message/${id}${token}">http://localhost:3000/account-verification-message/${id}${token}</a><br><br>The Team</p>`
-      html: `<p>Please click on the following link, or paste it into your browser to complete the account activation process:<br><br><a href="https://minu-login-system.herokuapp.com/account-verification-success/${id}${token}">https://minu-login-system.herokuapp.com/account-verification-success/${id}${token}</a><br><br>The Team</p>`
+      html: `<p>Please click on the following link, or paste it into your browser to complete the account activation process:<br><br><a href="https://minu-login-system.herokuapp.com/account-verification-message/${id}${token}">https://minu-login-system.herokuapp.com/account-verification-message/${id}${token}</a><br><br>The Team</p>`
   };
 
   transporter.sendMail(mailOptions, function(error, info) {
