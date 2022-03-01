@@ -6,7 +6,7 @@ const saltRounds = 10;
 const {resetPasswordEmail, activateAccountEmail} = require("../mail.js");
 const {promisify} = require("util");
 const {validationResult} = require("express-validator");
-var crypto = require('crypto');
+var randomstring = require("randomstring");
 require("dotenv").config();
 
 
@@ -58,12 +58,7 @@ exports.register = (req, res) => {
     // Create account
     } else {
 
-      var t = crypto.randomBytes(20).toString('hex');
-      var token = "";
-
-      bcrypt.hash(t, saltRounds, (err, hash) => {
-        token = hash;
-      });
+      var token = randomstring.generate(20);
 
       bcrypt.hash(password, saltRounds, (err, hash) => {
         db.query("INSERT INTO users (first_name, last_name, email, password, token, account_creation) VALUES (?,?,?,?,?,?)", [first_name, last_name, email, hash, token, account_creation.toISOString().split('T')[0]],
@@ -75,7 +70,7 @@ exports.register = (req, res) => {
                 if (error) {
                   throw error;
                 } else {
-                    const sent = activateAccountEmail(email, results[0].id, t);
+                    const sent = activateAccountEmail(email, results[0].id, token);
                     if (sent != "0"){
                       return res.render("account-verification", {title: "Account Verification"});
                     }
