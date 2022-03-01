@@ -13,3 +13,20 @@ DB_NAME=login
 JWT_SECRET=mysupersecretpassword
 JWT_EXPIRES_IN=90d
 JWT_COOKIE_EXPIRES=90
+
+Database schema:
+CREATE TABLE `login`.`users` (
+  `id` INT UNSIGNED AUTO_INCREMENT,
+  `first_name` VARCHAR(100),
+  `last_name` VARCHAR(100),
+  `email` VARCHAR(100),
+  `password` BINARY(60),
+  `token` BINARY(60),
+  `token_expires` BINARY(13),
+  `account_creation` DATE,
+  `active` TINYINT DEFAULT FALSE, 
+  `is_admin` TINYINT DEFAULT FALSE,
+
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE);
