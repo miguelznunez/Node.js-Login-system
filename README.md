@@ -17,7 +17,8 @@ JWT_EXPIRES_IN=90d
 JWT_COOKIE_EXPIRES=90
 
 =========================================================================
-Database schema:
+MySQL database schema:
+
 CREATE TABLE `login`.`users` (
   `id` INT UNSIGNED AUTO_INCREMENT,
   `first_name` VARCHAR(100),
