@@ -57,7 +57,7 @@ router.get("/password-reset-update/:id:token", authController.isLoggedIn, async 
     
 });
 
-router.get("/account-verification-success/:id:token", authController.isLoggedIn, async (req, res) => {
+router.get("/account-verification-message/:id:token", authController.isLoggedIn, async (req, res) => {
   // If user IS NOT logged in show the page
   if(!req.user){
     db.query("SELECT * FROM users WHERE id = ?", [req.params.id], async (error, results) => { 
