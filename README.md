@@ -25,9 +25,9 @@ CREATE TABLE `login`.`users` (
   `last_name` VARCHAR(100),
   `email` VARCHAR(100),
   `password` BINARY(60),
-  `token` BINARY(60),
+  `token` BINARY(20),
   `token_expires` BINARY(13),
-  `account_creation` DATE,
+  `account_creation` VARCHAR(10),
   `active` TINYINT DEFAULT FALSE, 
   `is_admin` TINYINT DEFAULT FALSE,
 
