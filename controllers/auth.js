@@ -10,15 +10,19 @@ var randomstring = require("randomstring");
 require("dotenv").config();
 
 
+function get_date(){
+  const date = new Date();
+  const month = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+  let day = date.getDate();
+  const year = date.getFullYear();
+  day = day < 10 ? "0" + day : day;
+  return  month[date.getMonth()] + "-" + day + "-" + year;
+}
+
 exports.register = (req, res) => {
 
   const { first_name, last_name, password, password_confirm } = req.body;
-
-  let account_creation = new Date();
-  const offset = account_creation.getTimezoneOffset();
-  account_creation = new Date(account_creation.getTime() - (offset*60*1000));
-
-  // const active = false;
+  const account_creation = get_date();
   var email = req.body.email;
 
   if(email === "@")
@@ -60,7 +64,7 @@ exports.register = (req, res) => {
       var token = randomstring.generate(20);
 
       bcrypt.hash(password, saltRounds, (err, hash) => {
-        db.query("INSERT INTO users (first_name, last_name, email, password, token, account_creation) VALUES (?,?,?,?,?,?)", [first_name, last_name, email, hash, token, account_creation.toISOString().split('T')[0]],
+        db.query("INSERT INTO users (first_name, last_name, email, password, token, account_creation) VALUES (?,?,?,?,?,?)", [first_name, last_name, email, hash, token, account_creation],
           async (error, results) => {
             if (error) {
               throw error;
