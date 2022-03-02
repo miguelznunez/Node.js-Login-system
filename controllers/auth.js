@@ -36,7 +36,7 @@ exports.register = (req, res) => {
   // If there are validation errors: return them to the user.
   if(!errors.isEmpty()){
     return res.render("register", { 
-      title:"Registration error",
+      title:"Register",
       allParsedErrors: allParsedErrors,
       first_name : first_name,
       last_name : last_name,
@@ -51,7 +51,8 @@ exports.register = (req, res) => {
       throw error;
     // Let the user know the email already exists
     } else if (results != ""){
-      return res.render("register", {success: false,
+      return res.render("register", {title:"Register",
+                                    success: false,
                                     message: "Account with that email already exists.",
                                     first_name : first_name,
                                     last_name : last_name,
@@ -129,6 +130,7 @@ exports.login = async (req, res) => {
     // If email or password field is blank
     if(!email || !password){
       return res.status(400).render("login", {
+        title:"Login",
         success: false,
         message: "Please provide an email and password."
       })
@@ -139,12 +141,13 @@ exports.login = async (req, res) => {
       // If email is not in database OR password does not match
       if(results == "" || !(await bcrypt.compare(password, results[0].password.toString()))){
         res.status(401).render("login", {
+          title:"Login",
           success: false,
           message: "Email or password is incorrect."
         })
         // If account has not been verified
       } else if (results[0].active != true) {
-        return res.render("login", {success: false, message: "This account is not verified."});
+        return res.render("login", {title:"Login", success: false, message: "This account is not verified."});
         // Else create a session cookie and allow the user to login
       } else {
         const id = results[0].id;
@@ -213,7 +216,7 @@ exports.resetEmail = (req, res) => {
     email === "" ||
     email === null
   ){
-    return res.render("password-reset", {success: false, message : "Email field cannot be empty."})
+    return res.render("password-reset", {title:"Password-reset", success: false, message : "Email field cannot be empty."})
   }
 
   db.query("SELECT * FROM users WHERE email = ?", [email] , (error, results) => {    
