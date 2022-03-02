@@ -38,7 +38,8 @@ router.get("/password-reset-update/:id:token", authController.isLoggedIn, async 
   if(!req.user){
     db.query("SELECT * FROM users WHERE id = ?", [req.params.id], async (error, results) => { 
       if((results != "") && (results[0].token != null) && (results[0].token_expires > Date.now()) ) {
-        if (await bcrypt.compare(req.params.token, results[0].token.toString()))
+
+        if ( req.params.token === results[0].token.toString() )
           res.render("password-reset-update", {title: "Password Reset Update", user : req.user, id: req.params.id, token: req.params.token, token_expires: results[0].token_expires, token_success: true} );
 
       } else{

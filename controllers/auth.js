@@ -57,7 +57,6 @@ exports.register = (req, res) => {
                                     password: password});
     // Create account
     } else {
-
       var token = randomstring.generate(20);
 
       bcrypt.hash(password, saltRounds, (err, hash) => {
@@ -218,24 +217,24 @@ exports.resetEmail = (req, res) => {
   db.query("SELECT * FROM users WHERE email = ?", [email] , (error, results) => {    
 
     if(results != "" && results[0].active != false) {
-      const token = crypto.randomBytes(20).toString('hex');
+      // Generate a token 
+      var token = randomstring.generate(20);
+      // Set token expiration date
       const token_expires = Date.now() + 3600000;
     
-      // send user reset password email
+      // Send user reset password email
       const sent = resetPasswordEmail(email, results[0].id, token);
 
       // If the password reset email was succesfully sent 
       if (sent != "0") {
-        bcrypt.hash(token, saltRounds, (err, hash) => {
-          const data = { token: hash, token_expires: token_expires};
-          db.query("UPDATE users SET ? WHERE email = ?", [data, email], (error, results) => {
-              if(error) { 
-                throw error;
-              } else {
-                // Reset password link email has been sent
-                return res.render("password-reset-sent", {title: "Password Reset Sent"});
-              }
-          });
+        const data = { token: token, token_expires: token_expires};
+        db.query("UPDATE users SET ? WHERE email = ?", [data, email], (error, results) => {
+            if(error) { 
+              throw error;
+            } else {
+              // Reset password link email has been sent
+              return res.render("password-reset-sent", {title: "Password Reset Sent"});
+            }
         });
       // If the password reset email was not sent because of a technical error
       } else {
