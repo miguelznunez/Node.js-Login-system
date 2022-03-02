@@ -11,12 +11,10 @@ require("dotenv").config();
 
 
 function get_date(){
-  const date = new Date();
-  const month = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
-  let day = date.getDate();
-  const year = date.getFullYear();
-  day = day < 10 ? "0" + day : day;
-  return  month[date.getMonth()] + "-" + day + "-" + year;
+  let yourDate = new Date()
+  const offset = yourDate.getTimezoneOffset();
+  yourDate = new Date(yourDate.getTime() - (offset*60*1000));
+  return yourDate.toISOString().split('T')[0]
 }
 
 exports.register = (req, res) => {
