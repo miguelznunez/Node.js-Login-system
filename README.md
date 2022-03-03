@@ -19,4 +19,4 @@ JWT_COOKIE_EXPIRES=90
 =========================================================================
 MySQL database schema:
 
-Copy and paster schema from db_schema.txt
+View schema from db_schema.txt
