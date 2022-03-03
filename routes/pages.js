@@ -27,7 +27,7 @@ router.get("/password-reset", authController.isLoggedIn, (req, res) => {
 
 router.get("/password-reset-update/:id:token", authController.isLoggedIn, async (req, res) => {
   if(!req.user){
-    db.query("SELECT * FROM users WHERE id = ?", [req.params.id], async (error, results) => { 
+    db.query("SELECT * FROM users WHERE id = ?", [req.params.id], async (err, results) => { 
       if((results != "") && (results[0].token != null) && (results[0].token_expires > Date.now()) ) {
 
         if ( req.params.token === results[0].token.toString() )
@@ -52,16 +52,13 @@ router.get("/password-reset-update/:id:token", authController.isLoggedIn, async 
 router.get("/account-verification-message/:id:token", authController.isLoggedIn, async (req, res) => {
   if(!req.user){
     // Check that the user exists
-    db.query("SELECT * FROM users WHERE id = ?", [req.params.id], async (error, results) => { 
-      if( (results != "") && (results[0].token != null) ) {
+    db.query("SELECT * FROM users WHERE id = ?", [req.params.id], async (err, results) => { 
+      if((results != "") && (results[0].token != null)) {
         if( req.params.token === results[0].token.toString()) {
           db.query("UPDATE users SET token = ?, status = ? WHERE id = ?", [null, "Active", results[0].id],
-          async (error, result) => {
-            if(error) {
-              throw error;
-            } else {
-              res.render("account-verification-message", {title: "Account Verification Message", user : req.user, success: true, message: "Account has been successfully verified."} );
-            }
+          async (err, result) => {
+            if(err) throw err;
+            else res.render("account-verification-message", {title: "Account Verification Message", user : req.user, success: true, message: "Account has been successfully verified."} );
           });
         } else {
            res.render("account-verification-message", {title: "Account Verification Message", user : req.user, token_success: false, message: "Authentication token is invalid or has expired."} );
@@ -77,7 +74,7 @@ router.get("/account-verification-message/:id:token", authController.isLoggedIn,
       expires: new Date(Date.now() + 2*1000),
       httpOnly: true
     });
-    return res.status(200).redirect("/");
+    res.status(200).redirect("/");
   }
     
 });

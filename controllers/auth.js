@@ -35,7 +35,7 @@ exports.register = (req, res) => {
 
   // If there are validation errors: return them to the user.
   if(!errors.isEmpty()){
-    return res.render("register", { 
+    res.render("register", { 
       title:"Register",
       allParsedErrors: allParsedErrors,
       first_name : first_name,
@@ -45,36 +45,36 @@ exports.register = (req, res) => {
     })
   }
   // If there isn't any validation errors: check if the email is already is in use
-  db.query("SELECT * FROM users WHERE email = ?", [email], async (error, results) => {
+  db.query("SELECT * FROM users WHERE email = ?", [email], async (err, results) => {
     // Technical errors
-    if (error) {
-      throw error;
+    if (err) {
+      throw err;
     // Let the user know the email already exists
     } else if (results != ""){
-      return res.render("register", {title:"Register",
-                                    success: false,
-                                    message: "Account with that email already exists.",
-                                    first_name : first_name,
-                                    last_name : last_name,
-                                    email: email,
-                                    password: password});
+      res.render("register", {title:"Register",
+                              success: false,
+                              message: "Account with that email already exists.",
+                              first_name : first_name,
+                              last_name : last_name,
+                              email: email,
+                              password: password});
     // Create account
     } else {
       var token = randomstring.generate(20);
 
       bcrypt.hash(password, saltRounds, (err, hash) => {
         db.query("INSERT INTO users (first_name, last_name, email, password, token, account_creation) VALUES (?,?,?,?,?,?)", [first_name, last_name, email, hash, token, account_creation],
-          async (error, results) => {
-            if (error) {
-              throw error;
+          async (err, results) => {
+            if (err) {
+              throw err;
             } else {
-              db.query("SELECT * FROM users WHERE email = ?",[email], async (error, results) => {
-                if (error) {
-                  throw error;
+              db.query("SELECT * FROM users WHERE email = ?",[email], async (err, results) => {
+                if (err) {
+                  throw err;
                 } else {
                     const sent = activateAccountEmail(email, results[0].id, token);
                     if (sent != "0"){
-                      return res.render("account-verification", {title: "Account Verification"});
+                      res.render("account-verification", {title: "Account Verification"});
                     }
                 }
               });
@@ -109,16 +109,13 @@ exports.updatePassword = (req, res) => {
     bcrypt.hash(password, saltRounds, (err, hash) => {
       var data = { token: null, token_expires: null, password: hash};
       db.query("UPDATE users SET ? WHERE id = ?", [data, id], (err, result) => {
-        if(err) { 
-          throw err
-        } else {
-          return res.render("password-reset-success", {title: "Password Reset Success"});
-        }
+        if(err) throw err
+        else res.render("password-reset-success", {title: "Password Reset Success"});
       });
     });
 
   } else {
-    return res.render("password-reset-update", {title: "Password Reset Update", token_success: false, message: "Password reset token is invalid or has expired." });
+    res.render("password-reset-update", {title: "Password Reset Update", token_success: false, message: "Password reset token is invalid or has expired." });
   }
   
 }
@@ -126,18 +123,16 @@ exports.updatePassword = (req, res) => {
 exports.login = async (req, res) => {
   try{
     const { email, password } = req.body;
-
     // If email or password field is blank
     if(!email || !password){
-      return res.status(400).render("login", {
+      res.status(400).render("login", {
         title:"Login",
         success: false,
         message: "Please provide an email and password."
       })
     }
-
     // Query the database
-    db.query("SELECT * FROM users WHERE email = ?", [email], async (error, results) => {
+    db.query("SELECT * FROM users WHERE email = ?", [email], async (err, results) => {
       // If email is not in database OR password does not match
       if(results == "" || !(await bcrypt.compare(password, results[0].password.toString()))){
         res.status(401).render("login", {
@@ -147,7 +142,7 @@ exports.login = async (req, res) => {
         })
         // If account has not been verified
       } else if (results[0].status != "Active") {
-        return res.render("login", {title:"Login", success: false, message: "This account is not verified."});
+        res.render("login", {title:"Login", success: false, message: "This account is not verified."});
         // Else create a session cookie and allow the user to login
       } else {
         const id = results[0].id;
@@ -167,9 +162,8 @@ exports.login = async (req, res) => {
         res.status(200).redirect("/");
       }
     });
-    
-  }catch(error){
-    console.log(error);
+  }catch(err){
+    console.log(err);
   }
 }
 
@@ -178,24 +172,20 @@ exports.isLoggedIn = async (req, res, next) => {
     try{
       //1) verify the token
       const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET);
-
       //2.) check if the user still exists
-      db.query("SELECT * FROM users WHERE id = ?", [decoded.id], (error, result) => {
-
+      db.query("SELECT * FROM users WHERE id = ?", [decoded.id], (err, result) => {
         if(!result){
           return next();
         }
-
         req.user = result[0];
         return next();
       })
-    }catch(error){
+    }catch(err){
       return next();
     }
   }else{
     next();
   }
-  
 }
 
 exports.logout = async (req, res) => {
@@ -203,51 +193,42 @@ exports.logout = async (req, res) => {
     expires: new Date(Date.now() + 2*1000),
     httpOnly: true
   });
-
   res.status(200).redirect("/");
 }
 
 exports.resetEmail = (req, res) => {
-
   var email = req.body.email;
-
   if(
     email === undefined ||
     email === "" ||
     email === null
   ){
-    return res.render("password-reset", {title:"Password-reset", success: false, message : "Email field cannot be empty."})
+    res.render("password-reset", {title:"Password-reset", success: false, message : "Email field cannot be empty."})
   }
 
-  db.query("SELECT * FROM users WHERE email = ?", [email] , (error, results) => {    
+  db.query("SELECT * FROM users WHERE email = ?", [email] , (err, results) => {    
 
     if(results != "" && results[0].status != "Not-active") {
       // Generate a token 
       var token = randomstring.generate(20);
       // Set token expiration date
       const token_expires = Date.now() + 3600000;
-    
       // Send user reset password email
       const sent = resetPasswordEmail(email, results[0].id, token);
-
       // If the password reset email was succesfully sent 
       if (sent != "0") {
         const data = { token: token, token_expires: token_expires};
-        db.query("UPDATE users SET ? WHERE email = ?", [data, email], (error, results) => {
-            if(error) { 
-              throw error;
-            } else {
-              // Reset password link email has been sent
-              return res.render("password-reset-sent", {title: "Password Reset Sent"});
-            }
+        db.query("UPDATE users SET ? WHERE email = ?", [data, email], (err, results) => {
+            if(err) throw err;
+            else res.render("password-reset-sent", {title: "Password Reset Sent"});
         });
       // If the password reset email was not sent because of a technical error
       } else {
-          return res.render("password-reset", {title: "Password Reset", success: false, message: "Something went wrong. Please try again."});
+        res.render("password-reset", {title: "Password Reset", success: false, message: "Something went wrong. Please try again."});
       }
     // Email is not registered or verified so no email will be sent
     } else {
-      return res.render("password-reset-sent", {title: "Password Reset Sent"});
+      res.render("password-reset-sent", {title: "Password Reset Sent"});
     }
   });
 
