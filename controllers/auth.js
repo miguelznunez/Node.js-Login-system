@@ -146,7 +146,7 @@ exports.login = async (req, res) => {
           message: "Email or password is incorrect."
         })
         // If account has not been verified
-      } else if (results[0].active != true) {
+      } else if (results[0].status != "Active") {
         return res.render("login", {title:"Login", success: false, message: "This account is not verified."});
         // Else create a session cookie and allow the user to login
       } else {
@@ -221,7 +221,7 @@ exports.resetEmail = (req, res) => {
 
   db.query("SELECT * FROM users WHERE email = ?", [email] , (error, results) => {    
 
-    if(results != "" && results[0].active != false) {
+    if(results != "" && results[0].status != "Not-active") {
       // Generate a token 
       var token = randomstring.generate(20);
       // Set token expiration date

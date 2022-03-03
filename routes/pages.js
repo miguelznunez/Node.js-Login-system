@@ -11,30 +11,21 @@ router.get("/", authController.isLoggedIn, (req, res) => {
 
 router.get("/register", authController.isLoggedIn, (req, res) => {
   // If user IS NOT logged in show the page otherwise redirect to the home page
-  if(!req.user)
-    res.render("register", {title: "Register", user : req.user});
-  else
-    res.redirect("/");
+  if(!req.user) res.render("register", {title: "Register", user : req.user});
+  else res.redirect("/");
 });
 
 router.get("/login", authController.isLoggedIn, (req, res) => {
-  // If user IS NOT logged in show the page otherwise redirect to the home page
-  if(!req.user)
-    res.render("login", {title: "Login", user : req.user});
-  else
-    res.redirect("/");
+  if(!req.user) res.render("login", {title: "Login", user : req.user});
+  else res.redirect("/");
 });
 
 router.get("/password-reset", authController.isLoggedIn, (req, res) => {
-  // If user IS NOT logged in show the page otherwise redirect to the home page
-  if(!req.user)
-    res.render("password-reset", {title: "Password Reset", user : req.user});
-  else
-    res.redirect("/");
+  if(!req.user) res.render("password-reset", {title: "Password Reset", user : req.user});
+  else res.redirect("/");
 });
 
 router.get("/password-reset-update/:id:token", authController.isLoggedIn, async (req, res) => {
-  // If user IS NOT logged in show the page
   if(!req.user){
     db.query("SELECT * FROM users WHERE id = ?", [req.params.id], async (error, results) => { 
       if((results != "") && (results[0].token != null) && (results[0].token_expires > Date.now()) ) {
@@ -59,16 +50,12 @@ router.get("/password-reset-update/:id:token", authController.isLoggedIn, async 
 });
 
 router.get("/account-verification-message/:id:token", authController.isLoggedIn, async (req, res) => {
-  // If user IS NOT logged in show the page
   if(!req.user){
     // Check that the user exists
     db.query("SELECT * FROM users WHERE id = ?", [req.params.id], async (error, results) => { 
       if( (results != "") && (results[0].token != null) ) {
-        // Compare the token in the URL to the token in the database
-        // the token is returned as an array buffer because we used binary in database column
-        // to convert it to a string we use toString()
         if( req.params.token === results[0].token.toString()) {
-          db.query("UPDATE users SET token = ?, active = ? WHERE id = ?", [null, true, results[0].id],
+          db.query("UPDATE users SET token = ?, status = ? WHERE id = ?", [null, "Active", results[0].id],
           async (error, result) => {
             if(error) {
               throw error;
@@ -97,11 +84,8 @@ router.get("/account-verification-message/:id:token", authController.isLoggedIn,
 
 router.get("/profile", authController.isLoggedIn, (req, res) => {
   // If user IS logged in show the page otherwise redirect to the home page
-  if(req.user){
-    res.render("profile", {title : "Profile", user : req.user } );
-  }else{
-    res.redirect("/login");
-  }
+  if(req.user) res.render("profile", {title : "Profile", user : req.user } );
+  else res.redirect("/login");
 });
 
 router.get("*", authController.isLoggedIn, (req, res) => {

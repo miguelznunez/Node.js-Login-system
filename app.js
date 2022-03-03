@@ -1,23 +1,17 @@
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-
+require("dotenv").config();
 const app = express();
 
-if(process.env.NODE_ENV !== "production"){
-  require("dotenv").config();
-}
-
-// access public folder
-const publicDirectory = path.join(__dirname, "./public" );
-app.use(express.static(publicDirectory));
+// Access public folder
+app.use(express.static('public'));
 
 // Parse URL-encoded bodies (as sent by HTML forms)
-// Makes sure you can grab the data from any from
 app.use(express.urlencoded({ extended: false }));
-// Parse JSON bodies (as sent by API clients)
-// Makin sure values we grab from form come in as JSON
 app.use(express.json());
+
+// Parse JSON bodies (as sent by API clients)
 app.use(cookieParser());
 
 // view engine setup
