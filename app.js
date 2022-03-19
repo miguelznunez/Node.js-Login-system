@@ -1,7 +1,7 @@
 const express = require("express");
-const path = require("path");
-const cookieParser = require("cookie-parser");
 require("dotenv").config();
+const cookieParser = require("cookie-parser");
+
 const app = express();
 
 // Access public folder
@@ -11,15 +11,14 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Parse JSON bodies (as sent by API clients)
 app.use(cookieParser());
 
 // view engine setup
 app.set("view engine", "ejs");
 
 // ROUTES
-app.use("/auth", require("./routes/auth"));
-app.use("/", require("./routes/pages"));
+app.use("/auth", require("./server/routes/auth"));
+app.use("/", require("./server/routes/pages"));
 
 const PORT = process.env.PORT || 3000;
 
