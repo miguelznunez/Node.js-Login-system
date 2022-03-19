@@ -1,4 +1,4 @@
-A complete login system with node.js and MySQL
+A complete login system with email verification using Node.js and MySQL
 
 =========================================================================
 
